@@ -1,0 +1,31 @@
+#tree_canvas {
+    width: 100%;
+    height: 720px;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.5) 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden;
+    cursor: grab;
+}
+
+    #tree_canvas.mouse_down {
+        cursor: grabbing;
+    }
+
+    #tree_canvas .img {
+        cursor: pointer !important;
+    }
+
+#tab_sd-webui-i2i-ancestral-tree {
+    background-color: #404040;
+    padding: 0px;
+}
+
+
+#i2i_tree_tools {
+    background: var(--block-background-fill);
+    padding: 1em;
+}
+
+    #i2i_tree_tools .form {
+        gap: 2em;
+    }
