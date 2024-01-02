@@ -11,19 +11,24 @@ def parse_latest_folder():
     latest_t2i_folder = max(
         os.listdir(T2I_OUTPUT_FOLDER),
         key=lambda folder: os.path.getmtime(os.path.join(T2I_OUTPUT_FOLDER, folder)),
-        default=None
+        default='.'
     )
 
     latest_i2i_folder = max(
         os.listdir(I2I_OUTPUT_FOLDER),
         key=lambda folder: os.path.getmtime(os.path.join(I2I_OUTPUT_FOLDER, folder)),
-        default=None
+        default='.'
     )
 
     return [
-        os.path.abspath(os.path.join(T2I_OUTPUT_FOLDER, latest_t2i_folder)),
-        os.path.abspath(os.path.join(I2I_OUTPUT_FOLDER, latest_i2i_folder))
+        os.path.join(T2I_OUTPUT_FOLDER, latest_t2i_folder).replace('/', '\\'),
+        os.path.join(I2I_OUTPUT_FOLDER, latest_i2i_folder).replace('/', '\\')
     ]
+
+def populate_textfields():
+    t2i, i2i = parse_latest_folder()
+    return [gr.update(value=t2i), gr.update(value=i2i)]
+
 
 def load_images(path_t2i:str, path_i2i:str) -> list:
     if len(path_t2i.strip()) == 0 or len(path_t2i.strip()) == 0:
@@ -33,12 +38,17 @@ def load_images(path_t2i:str, path_i2i:str) -> list:
     filesB = [os.path.join(path_i2i, F) for F in os.listdir(path_i2i)]
 
     return [
-        (img, f'{path2hash(img)}-{img2input(img)}') for img in (filesA + filesB)
+        (img, f'{img}_-{path2hash(img)}_-{img2input(img)}') for img in (filesA + filesB)
     ]
 
-def populate_textfields():
-    t2i, i2i = parse_latest_folder()
-    return [gr.update(value=t2i), gr.update(value=i2i)]
+
+def open_image(path:str):
+    import subprocess
+    if os.name == 'nt':
+        subprocess.Popen(['explorer', '/select,', path], shell=True)
+    else:
+        subprocess.Popen(['xdg-open', '--select', path])
+
 
 def tree_ui():
 
@@ -53,7 +63,12 @@ def tree_ui():
 
         res_gal = gr.Gallery(elem_id='i2i_tree_nodes', visible=False)
 
+        with gr.Row():
+            img_open = gr.Textbox('', visible=False, elem_id='i2i_tree_img_open')
+            oimg_btn = gr.Button('', visible=False, elem_id='i2i_tree_oimg_btn')
+
         pop_btn.click(populate_textfields, outputs=[out_t2i, out_i2i])
+        oimg_btn.click(open_image, inputs=[img_open])
         load_btn.click(load_images, inputs=[out_t2i, out_i2i], outputs=[res_gal]).success(
             None, None, None, _js="() => { i2i_construct_tree(); }")
 
