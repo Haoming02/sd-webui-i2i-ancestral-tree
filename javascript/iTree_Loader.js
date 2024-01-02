@@ -1,4 +1,17 @@
-﻿let treeSVG = null;
+﻿const iTree_Node_Size = 100;
+
+class iTree {
+    static treeSVG = null;
+    static treeGallery = null;
+    static img2open_text = null;
+    static img2open_btn = null;
+
+    static hashMap = null;
+
+    static nodeTree = null;
+    static nodeList = null;
+    static sourceList = null;
+}
 
 function construct_hierarchy(imgs) {
     const l = imgs.length;
@@ -10,9 +23,9 @@ function construct_hierarchy(imgs) {
         const [path, self, parent] = hash.split('_-');
 
         if (parent === 'None')
-            sourceList.push(new TreeNode(self, null, imgs[i].src, path));
+            sourceList.push(new iTreeNode(self, null, imgs[i].src, path));
         else
-            nodeList.push(new TreeNode(self, parent, imgs[i].src, path));
+            nodeList.push(new iTreeNode(self, parent, imgs[i].src, path));
     }
 
     return [nodeList, sourceList];
@@ -28,47 +41,127 @@ function prune_unused(nodeList, sourceList) {
     return [nodeList, sourceList];
 }
 
-function i2i_construct_tree() {
-    if (treeSVG === null)
-        treeSVG = tree_init();
+function recursive_mapping(parent, rank, layer) {
+    const ret = {};
+    let delta = 0;
+
+    iTree.nodeList.forEach((node) => {
+        if (node.parent !== parent.self)
+            return;
+
+        node.rank = rank;
+        node.layer = layer;
+        [delta, ret[node.self]] = recursive_mapping(node, rank, layer + 1);
+        rank += delta;
+    });
+
+    const l = Object.keys(ret).length;
+
+    if (l === 0)
+        return [1, null];
     else
-        while (treeSVG.firstChild) treeSVG.removeChild(treeSVG.lastChild);
+        return [l, ret];
+}
 
-    document.getElementById('i2i_tree_nodes').parentElement.style.background = 'var(--block-background-fill)';
+function forward_pass() {
+    iTree.nodeTree = {};
 
-    const imgs = document.getElementById('i2i_tree_nodes').querySelectorAll('img');
+    var rank = 0;
+    let delta = 0;
+
+    iTree.sourceList.forEach((node) => {
+        node.rank = rank;
+        node.layer = 0;
+        [delta, iTree.nodeTree[node.self]] = recursive_mapping(node, rank, 1);
+        rank += delta + 1;
+    });
+}
+
+function get_xCoord(layer) {
+    return 25 + 250 * layer;
+}
+
+function get_yCoord(layer, rank) {
+    return 25 + 150 * rank - 10 * layer;
+}
+
+function draw_connections(tree) {
+    for (const [key, value] of Object.entries(tree)) {
+
+        if (value === null || Object.keys(value).length === 0)
+            continue;
+
+        const from = iTree.hashMap[key];
+        const x1 = get_xCoord(from.layer) + iTree_Node_Size * 0.9;
+        const y1 = get_yCoord(from.layer, from.rank) + iTree_Node_Size / 2;
+
+        for (let i = 0; i < Object.keys(value).length; i++) {
+            const to = iTree.hashMap[Object.keys(value)[i]];
+            const x2 = get_xCoord(to.layer) + iTree_Node_Size * 0.1;
+            const y2 = get_yCoord(to.layer, to.rank) + iTree_Node_Size / 2;
+
+            const l = drawLine(x1, y1, x2, y2);
+            iTree.treeSVG.appendChild(l);
+        }
+
+        draw_connections(value);
+    }
+}
+
+function i2i_construct_tree() {
+    while (iTree.treeSVG.firstChild)
+        iTree.treeSVG.removeChild(iTree.treeSVG.lastChild);
+
+    const imgs = iTree.treeGallery.querySelectorAll('img');
     if (imgs.length == 0)
         return;
 
     const [allNodeList, allSourceList] = construct_hierarchy(imgs);
-    const [nodeList, sourceList] = prune_unused(allNodeList, allSourceList);
+    [iTree.nodeList, iTree.sourceList] = prune_unused(allNodeList, allSourceList);
 
-    // console.log(nodeList);
-    // console.log(sourceList);
+    // console.log(iTree.nodeList);
+    // console.log(iTree.sourceList);
 
-    const img2open_text = document.getElementById('i2i_tree_img_open').querySelector('textarea');
-    const img2open_btn = document.getElementById('i2i_tree_oimg_btn');
+    iTree.hashMap = {};
+    [...iTree.sourceList, ...iTree.nodeList].forEach((node) => {
+        iTree.hashMap[node.self] = node;
+    });
 
-    let i = 1;
+    // console.log(iTree.hashMap);
 
-    sourceList.forEach((sauce) => {
+    forward_pass();
+
+    // console.log(iTree.nodeTree);
+
+    draw_connections(iTree.nodeTree);
+
+    [...iTree.sourceList, ...iTree.nodeList].forEach((node) => {
         const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
-        image.setAttribute("href", sauce.url);
-
-        image.setAttribute("x", 128 * i);
-        image.setAttribute("y", "128");
-        image.setAttribute("width", "64");
-        image.setAttribute("height", "64");
-
         image.classList.add('img');
 
+        image.setAttribute("href", node.url);
+        image.setAttribute("x", get_xCoord(node.layer));
+        image.setAttribute("y", get_yCoord(node.layer, node.rank));
+        image.setAttribute("width", iTree_Node_Size);
+        image.setAttribute("height", iTree_Node_Size);
+
         image.addEventListener('click', () => {
-            img2open_text.value = sauce.path;
-            updateInput(img2open_text);
-            img2open_btn.click();
+            iTree.img2open_text.value = node.path;
+            updateInput(iTree.img2open_text);
+            iTree.img2open_btn.click();
         });
 
-        treeSVG.appendChild(image);
-        i++;
+        iTree.treeSVG.appendChild(image);
     });
+
 }
+
+onUiLoaded(async () => {
+    iTree.treeSVG = tree_init();
+
+    iTree.treeGallery = document.getElementById('i2i_tree_nodes');
+    iTree.treeGallery.parentElement.style.background = 'var(--block-background-fill)';
+
+    iTree.img2open_text = document.getElementById('i2i_tree_img_open').querySelector('textarea');
+    iTree.img2open_btn = document.getElementById('i2i_tree_oimg_btn');
+});

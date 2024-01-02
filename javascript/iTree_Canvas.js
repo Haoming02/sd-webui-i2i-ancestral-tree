@@ -1,9 +1,11 @@
-class TreeNode {
+class iTreeNode {
     constructor(self, parent, url, path) {
         this.self = self;
         this.parent = parent;
         this.url = url;
         this.path = path;
+        this.layer = -1;
+        this.rank = -1;
     }
 }
 
@@ -121,7 +123,7 @@ function tree_init() {
 
 function drawLine(p1x, p1y, p2x, p2y) {
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const offset = (Math.abs(p2x - p1x) + Math.abs(p2x - p1x)) / 4;
+    const offset = (Math.abs(p2x - p1x) + Math.abs(p2x - p1x)) / 8;
 
     // mid-point of line:
     const mpx = (p2x + p1x) * 0.5;
@@ -131,8 +133,8 @@ function drawLine(p1x, p1y, p2x, p2y) {
     const theta = Math.atan2(p2y - p1y, p2x - p1x) - Math.PI / 2;
 
     // location of control point:
-    const c1x = mpx + offset * Math.cos(theta);
-    const c1y = mpy + offset * Math.sin(theta);
+    const c1x = mpx + offset * Math.cos(theta) * (p2y < p1y ? 1.0 : -1.0);
+    const c1y = mpy + offset * Math.sin(theta) * (p2y < p1y ? 1.0 : -1.0);
 
     // construct the command to draw a quadratic curve
     const curve = `M${p1x} ${p1y} Q${c1x} ${c1y} ${p2x} ${p2y}`;

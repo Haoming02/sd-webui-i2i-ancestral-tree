@@ -43,11 +43,13 @@ def load_images(path_t2i:str, path_i2i:str) -> list:
 
 
 def open_image(path:str):
+    path = os.path.normpath(path)
+
     import subprocess
     if os.name == 'nt':
-        subprocess.Popen(['explorer', '/select,', path], shell=True)
+        subprocess.run(['explorer', '/select,', path])
     else:
-        subprocess.Popen(['xdg-open', '--select', path])
+        subprocess.run(['xdg-open', '--select', path])
 
 
 def tree_ui():
