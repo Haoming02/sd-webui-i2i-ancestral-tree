@@ -122,27 +122,22 @@ function tree_init() {
 }
 
 function drawLine(p1x, p1y, p2x, p2y) {
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const offset = (Math.abs(p2x - p1x) + Math.abs(p2x - p1x)) / 8;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-    // mid-point of line:
-    const mpx = (p2x + p1x) * 0.5;
-    const mpy = (p2y + p1y) * 0.5;
+    const mpx = (p2x + p1x) / 2 + (Math.random() - 0.5);
+    const mpy = (p2y + p1y) / 2 + (Math.random() - 0.5);
 
-    // angle of perpendicular to line:
-    const theta = Math.atan2(p2y - p1y, p2x - p1x) - Math.PI / 2;
+    const rpx = p1x * 0.45 + p2x * 0.55;
+    const lpx = p1x * 0.55 + p2x * 0.45;
 
-    // location of control point:
-    const c1x = mpx + offset * Math.cos(theta) * (p2y < p1y ? 1.0 : -1.0);
-    const c1y = mpy + offset * Math.sin(theta) * (p2y < p1y ? 1.0 : -1.0);
+    const shift = Math.max((128 - Math.abs(p2y - p1y)), 16.0) * (p2y > p1y ? -0.1 : 0.1);
 
-    // construct the command to draw a quadratic curve
-    const curve = `M${p1x} ${p1y} Q${c1x} ${c1y} ${p2x} ${p2y}`;
+    const curve = `M${p1x} ${p1y} C ${rpx} ${p1y + shift}, ${mpx} ${mpy}, ${mpx} ${mpy} S ${lpx} ${p2y - shift}, ${p2x} ${p2y}`;
 
-    line.setAttributeNS(null, 'd', curve);
-    line.setAttributeNS(null, 'stroke', 'cyan');
-    line.setAttributeNS(null, 'stroke-width', '2');
-    line.setAttributeNS(null, 'fill', 'none');
+    path.setAttributeNS(null, 'd', curve);
+    path.setAttributeNS(null, 'stroke', 'cyan');
+    path.setAttributeNS(null, 'stroke-width', '2.5');
+    path.setAttributeNS(null, 'fill', 'none');
 
-    return line;
+    return path;
 }

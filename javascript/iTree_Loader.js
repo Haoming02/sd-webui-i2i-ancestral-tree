@@ -82,7 +82,7 @@ function get_xCoord(layer) {
 }
 
 function get_yCoord(layer, rank) {
-    return 25 + 150 * rank - 10 * layer;
+    return 200 * rank - 25 * layer;
 }
 
 function draw_connections(tree) {
@@ -92,12 +92,12 @@ function draw_connections(tree) {
             continue;
 
         const from = iTree.hashMap[key];
-        const x1 = get_xCoord(from.layer) + iTree_Node_Size * 0.9;
+        const x1 = get_xCoord(from.layer) + iTree_Node_Size * 0.85;
         const y1 = get_yCoord(from.layer, from.rank) + iTree_Node_Size / 2;
 
         for (let i = 0; i < Object.keys(value).length; i++) {
             const to = iTree.hashMap[Object.keys(value)[i]];
-            const x2 = get_xCoord(to.layer) + iTree_Node_Size * 0.1;
+            const x2 = get_xCoord(to.layer) + iTree_Node_Size * 0.15;
             const y2 = get_yCoord(to.layer, to.rank) + iTree_Node_Size / 2;
 
             const l = drawLine(x1, y1, x2, y2);
