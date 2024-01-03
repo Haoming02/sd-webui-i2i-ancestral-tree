@@ -1,9 +1,10 @@
 class iTreeNode {
-    constructor(self, parent, url, path) {
+    constructor(self, parent, url, path, type) {
         this.self = self;
         this.parent = parent;
         this.url = url;
         this.path = path;
+        this.type = type;
         this.layer = -1;
         this.rank = -1;
     }
@@ -121,7 +122,7 @@ function tree_init() {
     return SVG;
 }
 
-function drawLine(p1x, p1y, p2x, p2y) {
+function drawLine(p1x, p1y, p2x, p2y, color) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
     const mpx = (p2x + p1x) / 2 + (Math.random() - 0.5);
@@ -135,7 +136,23 @@ function drawLine(p1x, p1y, p2x, p2y) {
     const curve = `M${p1x} ${p1y} C ${rpx} ${p1y + shift}, ${mpx} ${mpy}, ${mpx} ${mpy} S ${lpx} ${p2y - shift}, ${p2x} ${p2y}`;
 
     path.setAttributeNS(null, 'd', curve);
-    path.setAttributeNS(null, 'stroke', 'cyan');
+    switch (color) {
+        case 'I2I':
+            path.setAttributeNS(null, 'stroke', 'cyan');
+            break;
+        case 'UPS':
+            path.setAttributeNS(null, 'stroke', 'green');
+            break;
+        case 'DWS':
+            path.setAttributeNS(null, 'stroke', 'red');
+            break;
+        case 'INP':
+            path.setAttributeNS(null, 'stroke', 'orange');
+            break;
+        default:
+            console.log('Alpha version of metadata detected! These images will no longer work...');
+            break;
+    }
     path.setAttributeNS(null, 'stroke-width', '2.5');
     path.setAttributeNS(null, 'fill', 'none');
 

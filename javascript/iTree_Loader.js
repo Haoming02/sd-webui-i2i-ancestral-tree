@@ -23,9 +23,9 @@ function construct_hierarchy(imgs) {
         const [path, self, parent] = hash.split('_-');
 
         if (parent === 'None')
-            sourceList.push(new iTreeNode(self, null, imgs[i].src, path));
+            sourceList.push(new iTreeNode(self, null, imgs[i].src, path, null));
         else
-            nodeList.push(new iTreeNode(self, parent, imgs[i].src, path));
+            nodeList.push(new iTreeNode(self, parent.substring(3), imgs[i].src, path, parent.substring(0, 3)));
     }
 
     return [nodeList, sourceList];
@@ -72,6 +72,10 @@ function forward_pass() {
         node.layer = 0;
 
         [childCount, iTree.nodeTree[node.self]] = recursive_mapping(node, rank, 1);
+
+        if (childCount > 3)
+            node.rank += Math.round(childCount / 2 - 0.6);
+
         rank += childCount;
     });
 }
@@ -99,8 +103,7 @@ function draw_connections(tree) {
             const x2 = get_xCoord(to.layer) + iTree_Node_Size * 0.15;
             const y2 = get_yCoord(to.layer, to.rank) + iTree_Node_Size / 2;
 
-            const l = drawLine(x1, y1, x2, y2);
-            iTree.treeSVG.appendChild(l);
+            iTree.treeSVG.appendChild(drawLine(x1, y1, x2, y2, to.type));
         }
 
         draw_connections(value);

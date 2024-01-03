@@ -31,5 +31,17 @@ class i2iInfo(scripts.Script):
         return None
 
     def process(self, p):
-        p.extra_generation_params['input_hash'] = img2hash(p.init_images[0])
+        i2i_type = 'I2I'
+
+        if getattr(p, 'image_mask', None) is not None:
+            i2i_type = 'INP'
+        else:
+            w, h = p.init_images[0].size
+
+            if int(w) > int(p.width) or int(h) > int(p.height):
+                i2i_type = 'DWS'
+            elif int(w) < int(p.width) or int(h) < int(p.height):
+                i2i_type = 'UPS'
+
+        p.extra_generation_params['input_hash'] = f'{i2i_type}{img2hash(p.init_images[0])}'
         return p
