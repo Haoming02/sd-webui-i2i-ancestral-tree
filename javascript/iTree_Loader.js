@@ -90,11 +90,11 @@ function forward_pass() {
 }
 
 function get_xCoord(layer) {
-    return 25 + 250 * layer;
+    return (iTree_Node_Size * 3) * layer;
 }
 
 function get_yCoord(layer, rank) {
-    return 200 * rank - 100 * layer;
+    return (iTree_Node_Size * 1.5) * rank - (iTree_Node_Size * 1.5 / 2) * layer;
 }
 
 function draw_connections(tree) {

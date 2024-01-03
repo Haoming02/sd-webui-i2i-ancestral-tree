@@ -48,6 +48,7 @@ def load_images(path_t2i:str, t2i_folders:str, path_i2i:str, i2i_folders:str) ->
 
     image_files = []
     for FOLDER in (foldersA + foldersB):
+        if not os.path.exists(FOLDER): continue
         image_files += [os.path.join(FOLDER, F) for F in os.listdir(FOLDER)]
 
     return [
