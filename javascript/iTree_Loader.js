@@ -36,7 +36,16 @@ function prune_unused(nodeList, sourceList) {
     sourceList = sourceList.filter(item => srcs.has(item.self));
 
     const selfs = new Set([...nodeList, ...sourceList].map(node => node.self));
-    nodeList = nodeList.filter(item => selfs.has(item.parent));
+
+    for (let i = nodeList.length - 1; i >= 0; i--) {
+        if (selfs.has(nodeList[i].parent))
+            continue;
+        else if (srcs.has(nodeList[i].self)) {
+            sourceList.push(nodeList[i]);
+            nodeList.splice(i, 1);
+        } else
+            nodeList.splice(i, 1);
+    }
 
     return [nodeList, sourceList];
 }

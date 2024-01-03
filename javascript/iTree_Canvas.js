@@ -49,7 +49,7 @@ function register_dragging(canvas, SVG) {
 
     canvas.addEventListener('keydown', (e) => {
         if (e.key === ' ')
-            SVG.setAttributeNS(null, 'viewBox', '0 0 1280 640');
+            SVG.setAttributeNS(null, 'viewBox', '-50 -200 1280 640');
     });
 
     canvas.addEventListener('mousedown', (e) => {
@@ -112,7 +112,7 @@ function tree_init() {
 
     SVG.setAttributeNS(null, 'width', "100%");
     SVG.setAttributeNS(null, 'height', "100%");
-    SVG.setAttributeNS(null, 'viewBox', "0 0 1280 640");
+    SVG.setAttributeNS(null, 'viewBox', "-50 -200 1280 640");
 
     register_dragging(canvas, SVG);
 
@@ -122,26 +122,30 @@ function tree_init() {
     return SVG;
 }
 
+function jitter(str) {
+    return (Math.random() - 0.5) * str;
+}
+
 function drawLine(p1x, p1y, p2x, p2y, color) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-    const mpx = (p2x + p1x) / 2 + (Math.random() - 0.5);
-    const mpy = (p2y + p1y) / 2 + (Math.random() - 0.5);
+    const mpx = (p2x + p1x) / 2 + jitter(10);
+    const mpy = (p2y + p1y) / 2 + jitter(10);
 
-    const rpx = p1x * 0.45 + p2x * 0.55;
-    const lpx = p1x * 0.55 + p2x * 0.45;
+    const rpx = mpx * 0.25 + (p1x * 0.4 + p2x * 0.6) * 0.75;
+    const lpx = mpx * 0.25 + (p1x * 0.6 + p2x * 0.4) * 0.75;
 
-    const shift = Math.max((128 - Math.abs(p2y - p1y)), 16.0) * (p2y > p1y ? -0.1 : 0.1);
+    const shift = Math.max((128 - Math.abs(p2y - p1y)), 16.0) * (Math.sign(p2y - p1y) * -0.1);
 
-    const curve = `M${p1x} ${p1y} C ${rpx} ${p1y + shift}, ${mpx} ${mpy}, ${mpx} ${mpy} S ${lpx} ${p2y - shift}, ${p2x} ${p2y}`;
+    const curve = `M ${p1x} ${p1y} C ${(p1x + rpx) / 2} ${p1y + shift}, ${(mpx + rpx) / 2} ${(mpy + p1y) / 2}, ${mpx} ${mpy} C ${(mpx + lpx) / 2} ${(mpy + p2y) / 2}, ${(p2x + lpx) / 2} ${p2y - shift}, ${p2x} ${p2y}`;
 
     path.setAttributeNS(null, 'd', curve);
     switch (color) {
         case 'I2I':
-            path.setAttributeNS(null, 'stroke', 'cyan');
+            path.setAttributeNS(null, 'stroke', 'lime');
             break;
         case 'UPS':
-            path.setAttributeNS(null, 'stroke', 'lime');
+            path.setAttributeNS(null, 'stroke', 'orange');
             break;
         case 'DWS':
             path.setAttributeNS(null, 'stroke', 'red');
