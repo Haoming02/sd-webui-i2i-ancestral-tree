@@ -141,19 +141,19 @@ function drawLine(p1x, p1y, p2x, p2y, color) {
             path.setAttributeNS(null, 'stroke', 'cyan');
             break;
         case 'UPS':
-            path.setAttributeNS(null, 'stroke', 'green');
+            path.setAttributeNS(null, 'stroke', 'lime');
             break;
         case 'DWS':
             path.setAttributeNS(null, 'stroke', 'red');
             break;
         case 'INP':
-            path.setAttributeNS(null, 'stroke', 'orange');
+            path.setAttributeNS(null, 'stroke', 'violet');
             break;
         default:
-            console.log('Alpha version of metadata detected! These images will no longer work...');
+            console.log('Outdated version of metadata detected! These images will no longer work...');
             break;
     }
-    path.setAttributeNS(null, 'stroke-width', '2.5');
+    path.setAttributeNS(null, 'stroke-width', '2');
     path.setAttributeNS(null, 'fill', 'none');
 
     return path;

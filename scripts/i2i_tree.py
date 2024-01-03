@@ -21,24 +21,37 @@ def parse_latest_folder():
     )
 
     return [
-        os.path.join(T2I_OUTPUT_FOLDER, latest_t2i_folder).replace('/', '\\'),
-        os.path.join(I2I_OUTPUT_FOLDER, latest_i2i_folder).replace('/', '\\')
+        T2I_OUTPUT_FOLDER.replace('/', '\\'),
+        latest_i2i_folder.replace('/', '\\'),
+        I2I_OUTPUT_FOLDER.replace('/', '\\'),
+        latest_i2i_folder.replace('/', '\\')
     ]
 
 def populate_textfields():
-    t2i, i2i = parse_latest_folder()
-    return [gr.update(value=t2i), gr.update(value=i2i)]
+    t2i, t2if, i2i, i2if = parse_latest_folder()
+    return [
+        gr.update(value=t2i),
+        gr.update(value=t2if),
+        gr.update(value=i2i),
+        gr.update(value=i2if)
+    ]
 
 
-def load_images(path_t2i:str, path_i2i:str) -> list:
+def load_images(path_t2i:str, t2i_folders:str, path_i2i:str, i2i_folders:str) -> list:
     if len(path_t2i.strip()) == 0 or len(path_t2i.strip()) == 0:
         return []
+    if len(t2i_folders.strip()) == 0 or len(i2i_folders.strip()) == 0:
+        return []
 
-    filesA = [os.path.join(path_t2i, F) for F in os.listdir(path_t2i)]
-    filesB = [os.path.join(path_i2i, F) for F in os.listdir(path_i2i)]
+    foldersA = [os.path.join(path_t2i, SUB.strip()) for SUB in t2i_folders.split(',')]
+    foldersB = [os.path.join(path_i2i, SUB.strip()) for SUB in i2i_folders.split(',')]
+
+    image_files = []
+    for FOLDER in (foldersA + foldersB):
+        image_files += [os.path.join(FOLDER, F) for F in os.listdir(FOLDER)]
 
     return [
-        (img, f'{img}_-{path2hash(img)}_-{img2input(img)}') for img in (filesA + filesB)
+        (img, f'{img}_-{path2hash(img)}_-{img2input(img)}') for img in image_files
     ]
 
 
@@ -57,9 +70,11 @@ def tree_ui():
     with gr.Blocks() as TREE:
         with gr.Column(elem_id='i2i_tree_tools'):
             with gr.Row():
-                out_t2i = gr.Textbox('', max_lines=1, label='txt2img Output', interactive=True, scale=5)
+                out_t2i = gr.Textbox('', max_lines=1, label='txt2img', interactive=True, scale=2)
+                out_t2if = gr.Textbox('', max_lines=1, label='Folders', interactive=True, scale=3)
                 pop_btn = gr.Button('Populate', scale=1)
-                out_i2i = gr.Textbox('', max_lines=1, label='img2img Output', interactive=True, scale=5)
+                out_i2i = gr.Textbox('', max_lines=1, label='img2img', interactive=True, scale=2)
+                out_i2if = gr.Textbox('', max_lines=1, label='Folders', interactive=True, scale=3)
 
             load_btn = gr.Button('Load', variant='primary')
 
@@ -69,9 +84,9 @@ def tree_ui():
             img_open = gr.Textbox('', visible=False, elem_id='i2i_tree_img_open')
             oimg_btn = gr.Button('', visible=False, elem_id='i2i_tree_oimg_btn')
 
-        pop_btn.click(populate_textfields, outputs=[out_t2i, out_i2i])
+        pop_btn.click(populate_textfields, outputs=[out_t2i, out_t2if, out_i2i, out_i2if])
         oimg_btn.click(open_image, inputs=[img_open])
-        load_btn.click(load_images, inputs=[out_t2i, out_i2i], outputs=[res_gal]).success(
+        load_btn.click(load_images, inputs=[out_t2i, out_t2if, out_i2i, out_i2if], outputs=[res_gal]).success(
             None, None, None, _js="() => { i2i_construct_tree(); }")
 
     return [(TREE, 'i2i Tree', 'sd-webui-i2i-ancestral-tree')]
