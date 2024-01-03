@@ -43,37 +43,36 @@ function prune_unused(nodeList, sourceList) {
 
 function recursive_mapping(parent, rank, layer) {
     const ret = {};
-    let delta = 0;
+    var childCount = 0;
 
     iTree.nodeList.forEach((node) => {
         if (node.parent !== parent.self)
             return;
 
+        var delta = 0;
+
         node.rank = rank;
         node.layer = layer;
-        [delta, ret[node.self]] = recursive_mapping(node, rank, layer + 1);
+        [delta, ret[node.self]] = recursive_mapping(node, rank - 1, layer + 1);
         rank += delta;
+        childCount += delta;
     });
 
-    const l = Object.keys(ret).length;
-
-    if (l === 0)
-        return [1, null];
-    else
-        return [l, ret];
+    return [Math.max(childCount, 1), ret];
 }
 
 function forward_pass() {
     iTree.nodeTree = {};
 
     var rank = 0;
-    let delta = 0;
+    var childCount = 0;
 
     iTree.sourceList.forEach((node) => {
         node.rank = rank;
         node.layer = 0;
-        [delta, iTree.nodeTree[node.self]] = recursive_mapping(node, rank, 1);
-        rank += delta + 1;
+
+        [childCount, iTree.nodeTree[node.self]] = recursive_mapping(node, rank - 1, 1);
+        rank += childCount;
     });
 }
 
@@ -82,7 +81,7 @@ function get_xCoord(layer) {
 }
 
 function get_yCoord(layer, rank) {
-    return 200 * rank - 25 * layer;
+    return 200 * rank;
 }
 
 function draw_connections(tree) {
