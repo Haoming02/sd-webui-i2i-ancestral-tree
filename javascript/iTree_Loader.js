@@ -53,8 +53,8 @@ function recursive_mapping(parent, rank, layer) {
 
         node.rank = rank;
         node.layer = layer;
-        [delta, ret[node.self]] = recursive_mapping(node, rank - 1, layer + 1);
-        rank += delta;
+        [delta, ret[node.self]] = recursive_mapping(node, rank, layer + 1);
+        rank += (delta > 1 ? delta - 1 : delta);
         childCount += delta;
     });
 
@@ -71,7 +71,7 @@ function forward_pass() {
         node.rank = rank;
         node.layer = 0;
 
-        [childCount, iTree.nodeTree[node.self]] = recursive_mapping(node, rank - 1, 1);
+        [childCount, iTree.nodeTree[node.self]] = recursive_mapping(node, rank, 1);
         rank += childCount;
     });
 }
@@ -81,7 +81,7 @@ function get_xCoord(layer) {
 }
 
 function get_yCoord(layer, rank) {
-    return 200 * rank;
+    return 200 * rank - 100 * layer;
 }
 
 function draw_connections(tree) {
