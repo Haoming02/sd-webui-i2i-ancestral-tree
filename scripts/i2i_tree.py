@@ -50,20 +50,21 @@ def load_images(image_paths:str, recursive:bool) -> list:
 
     image_files = []
     for FOLDER in folders:
-        if not os.path.exists(FOLDER): continue
-        image_files += [os.path.join(FOLDER, F) for F in os.listdir(FOLDER)]
+        if os.path.exists(FOLDER):
+            image_files += [os.path.join(FOLDER, F) for F in os.listdir(FOLDER)]
 
     img_list = []
     for img in image_files:
         try:
             img_list.append((img, f'{img}_-{path2hash(img)}_-{img2input(img)}'))
+
         except PermissionError:
             # Folder
-
             if not recursive:
                 continue
             else:
                 img_list += load_images(img, True)
+
         except UnidentifiedImageError:
             # Not Image
             continue
