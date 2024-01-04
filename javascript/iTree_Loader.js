@@ -50,6 +50,22 @@ function prune_unused(nodeList, sourceList) {
     return [nodeList, sourceList];
 }
 
+function prune_dupes() {
+    for (let i = iTree.nodeList.length - 1; i > 0; i--) {
+        for (let ii = i - 1; ii >= 0; ii--) {
+            if (iTree.nodeList[i].self === iTree.nodeList[ii].self)
+                iTree.nodeList.splice(i, 1);
+        }
+    }
+
+    for (let i = iTree.sourceList.length - 1; i >= 0; i--) {
+        for (let ii = i - 1; ii >= 0; ii--) {
+            if (iTree.sourceList[i].self === iTree.sourceList[ii].self)
+                iTree.sourceList.splice(i, 1);
+        }
+    }
+}
+
 function recursive_mapping(parent, rank, layer) {
     const ret = {};
     var childCount = 0;
@@ -128,7 +144,12 @@ function i2i_construct_tree() {
         return;
 
     const [allNodeList, allSourceList] = construct_hierarchy(imgs);
+
+    // console.log(allNodeList);
+    // console.log(allSourceList);
+
     [iTree.nodeList, iTree.sourceList] = prune_unused(allNodeList, allSourceList);
+    prune_dupes();
 
     // console.log(iTree.nodeList);
     // console.log(iTree.sourceList);

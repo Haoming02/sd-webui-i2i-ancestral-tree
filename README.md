@@ -14,17 +14,22 @@ This is an Extension for the [Automatic1111 Webui](https://github.com/AUTOMATIC1
 - This will also add a new **i2i Tree** tab
 - Click on **Populate** to automatically fill in the latest output folders
     - Edit the fields if you want to visualize older generations
-    - Separate multiple folders with `,` *(only for the `Folders` field)*
-- Click on **Load** to generate the relational graph
+    - Separate multiple folders into individual lines
+- Click on **Generate** to create the relational graph
 - Source images *(**eg.** `txt2img` generations)* will appear on the left most side
 - `img2img` and `Inpaint` results will appear on the right side, with colored connections showing the operation
     - **Violet:** Inpaint
     - **Orange:** Upscale
     - **Red:** Downscale
     - **Lime:** img2img
+- `Sketch` and `Inpaint sketch` results do **not** work
 
 ### Control
 - Use **Middle Mouse** to pan/move 
 - Use **Scroll Wheel** to zoom
 - Pressing **Space** to quickly return to the default view
 - Clicking on an image will open the file explorer, with said file highlighted
+
+## Roadmap
+- [ ] More generation information
+- [ ] Checkbox for recursive processing images from folders
