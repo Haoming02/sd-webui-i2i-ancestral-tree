@@ -41,7 +41,7 @@ def populate_textfields():
         return gr.update(value='')
 
 
-def load_images(image_paths:str) -> list:
+def load_images(image_paths:str, recursive:bool) -> list:
     if len(image_paths.strip()) == 0:
         print('Path is Empty...')
         return []
@@ -59,7 +59,11 @@ def load_images(image_paths:str) -> list:
             img_list.append((img, f'{img}_-{path2hash(img)}_-{img2input(img)}'))
         except PermissionError:
             # Folder
-            continue
+
+            if not recursive:
+                continue
+            else:
+                img_list += load_images(img, True)
         except UnidentifiedImageError:
             # Not Image
             continue
@@ -87,6 +91,7 @@ def tree_ui():
             with gr.Row():
                 img_folders = gr.Textbox('', lines=4, label='Image Folders', interactive=True, scale=8)
                 with gr.Column(scale=1):
+                    rec_cbx = gr.Checkbox(label='Recursive Search')
                     pop_btn = gr.Button('(Try) Populate')
                     load_btn = gr.Button('Generate', variant='primary')
 
@@ -98,7 +103,7 @@ def tree_ui():
 
         pop_btn.click(populate_textfields, outputs=img_folders)
         oimg_btn.click(open_image, inputs=img_open)
-        load_btn.click(load_images, inputs=img_folders, outputs=res_gal).success(
+        load_btn.click(load_images, inputs=[img_folders, rec_cbx], outputs=res_gal).success(
             None, None, None, _js="() => { i2i_construct_tree(); }")
 
     return [(TREE, 'i2i Tree', 'sd-webui-i2i-ancestral-tree')]
