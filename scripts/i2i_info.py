@@ -1,5 +1,7 @@
 import modules.scripts as scripts
+from pathlib import Path
 from PIL import Image
+import os
 
 
 def img2hash(img:Image) -> str:
@@ -10,11 +12,24 @@ def path2hash(path:str) -> str:
     return img2hash(Image.open(path))
 
 def img2input(path:str) -> str:
-    params = Image.open(path).info['parameters'].split(',')
+    try:
+        params = Image.open(path).info['parameters'].split(',')
+        for p in params:
+            if 'input_hash' in p:
+                return p.split(':')[1].strip()
 
-    for p in params:
-        if 'input_hash' in p:
-            return p.split(':')[1].strip()
+    except KeyError:
+        p = Path(path)
+        info = p.with_suffix('.txt')
+        if os.path.exists(info):
+
+            with open(info, 'r', encoding='utf8') as INFOTEXT:
+                DATA = INFOTEXT.readlines()
+
+                for chunks in [line.split(',') for line in DATA]:
+                    for p in chunks:
+                        if 'input_hash' in p:
+                            return p.split(':')[1].strip()
 
     return None
 

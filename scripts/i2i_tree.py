@@ -1,4 +1,5 @@
 from scripts.i2i_info import img2input, path2hash
+from PIL import UnidentifiedImageError
 from modules import script_callbacks
 from modules.shared import opts
 import gradio as gr
@@ -58,6 +59,9 @@ def load_images(image_paths:str) -> list:
             img_list.append((img, f'{img}_-{path2hash(img)}_-{img2input(img)}'))
         except PermissionError:
             # Folder
+            continue
+        except UnidentifiedImageError:
+            # Not Image
             continue
 
     if len(img_list) == 0:
