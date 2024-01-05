@@ -7,7 +7,7 @@ import os
 
 
 empty_count = 0
-Sisyphus = 64
+Sisyphus = 100
 """Safe Guard to avoid unnecessary parsing..."""
 
 
@@ -20,8 +20,8 @@ def parse_latest_folder() -> str:
 
     # [Default]: Empty; Uses outputs folder with sub-folder
     if len(opts.outdir_samples.strip()) == 0:
-        dir2check.append(os.path.abspath(opts.outdir_txt2img_samples))
         dir2check.append(os.path.abspath(opts.outdir_img2img_samples))
+        dir2check.append(os.path.abspath(opts.outdir_txt2img_samples))
     else:
         dir2check.append(os.path.abspath(opts.outdir_samples))
 
@@ -89,7 +89,9 @@ def load_images(image_paths:str, recursive:bool) -> list:
                 empty_count -= 1
 
             if empty_count > Sisyphus:
-                CHECK = input(f'\nNone of the past {Sisyphus} images contains the input hash information...\nDo you wish to continue?\n\t[Y/n]: ')
+                print(f'\nNone of the past {Sisyphus} images contains the input hash information...')
+                print('(This could also simply mean it is loading txt2img results)')
+                CHECK = input('Do you wish to continue?\n\t[Y/n]: ')
 
                 if CHECK.strip() == 'Y':
                     empty_count = 0
