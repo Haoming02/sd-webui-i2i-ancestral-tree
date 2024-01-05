@@ -72,6 +72,8 @@ def load_images(image_paths:str, recursive:bool) -> list:
     empty_count = 0
     return_list = []
 
+    image_files = sorted(image_files, key=lambda x: os.path.getmtime(x), reverse=True)
+
     for img in image_files:
         if empty_count > Sisyphus:
             break
