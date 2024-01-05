@@ -103,16 +103,16 @@ def load_images(image_paths:str, recursive:bool) -> list:
 
         except PermissionError:
             # Folder
-            if not recursive:
-                continue
+            if recursive is True or recursive is None:
+                return_list += load_images(img, None)
             else:
-                return_list += load_images(img, True)
+                continue
 
         except UnidentifiedImageError:
             # Not Image
             continue
 
-    if len(return_list) == 0:
+    if recursive is not None and len(return_list) == 0:
         print('Hmm... No images detected...')
 
     return return_list
