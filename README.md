@@ -33,8 +33,9 @@ This is an Extension for the [Automatic1111 Webui](https://github.com/AUTOMATIC1
 ### Notice
 - `Sketch` and `Inpaint sketch` results do **not** work
 - If you have a lot of images, it will take a long time to load, and an even longer time as well as a large amount of RAM to generate the graphs...
+- Again, this only works on images generated **after** the Extension is installed
 
 ## Roadmap
-- [X] Checkbox for recursive processing images from folders
-- [ ] More generation information
-- [ ] Cache the search results in some sort of database to avoid parsing every single time
+- [ ] Add some form of loading indicator
+- [ ] Cache the search results in some sort of database 
+- [ ] Provide more useful information on the Graph
