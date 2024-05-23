@@ -1,40 +1,7 @@
-from modules.images import read_info_from_image
-import modules.scripts as scripts
-from pathlib import Path
-from PIL import Image
-import os
+"""Script that injects source information during img2img"""
 
-
-def img2hash(img:Image) -> str:
-    from hashlib import md5
-    return md5(img.convert('L').tobytes()).hexdigest()
-
-def path2hash(path:str) -> str:
-    return img2hash(Image.open(path))
-
-def img2input(path:str) -> str:
-    info, _ = read_info_from_image(Image.open(path))
-
-    if info is not None:
-        for chunks in [line.split(',') for line in info.split('\n')]:
-            for p in chunks:
-                if 'input_hash' in p:
-                    return p.split(':')[1].strip()
-
-    else:
-        p = Path(path)
-        info = p.with_suffix('.txt')
-        if os.path.exists(info):
-
-            with open(info, 'r', encoding='utf8') as INFOTEXT:
-                DATA = INFOTEXT.readlines()
-
-                for chunks in [line.split(',') for line in DATA]:
-                    for p in chunks:
-                        if 'input_hash' in p:
-                            return p.split(':')[1].strip()
-
-    return None
+from scripts.i2i_cache import image_to_hash
+from modules import scripts
 
 
 class i2iInfo(scripts.Script):
@@ -49,17 +16,23 @@ class i2iInfo(scripts.Script):
         return None
 
     def process(self, p):
-        i2i_type = 'I2I'
+        i2i_type = "img2img"
+        source_image = p.init_images[0]
 
-        if getattr(p, 'image_mask', None) is not None:
-            i2i_type = 'INP'
+        if getattr(p, "image_mask", None):
+            i2i_type = "inpaint"
         else:
-            w, h = p.init_images[0].size
+            old_w, old_h = source_image.size
+            new_w = p.width
+            new_h = p.height
 
-            if int(w) > int(p.width) or int(h) > int(p.height):
-                i2i_type = 'DWS'
-            elif int(w) < int(p.width) or int(h) < int(p.height):
-                i2i_type = 'UPS'
+            if (new_w > old_w) or (new_h > old_h):
+                i2i_type = "upscale"
+            elif (new_w < old_w) or (new_h < old_h):
+                i2i_type = "downscale"
 
-        p.extra_generation_params['input_hash'] = f'{i2i_type}{img2hash(p.init_images[0])}'
+        p.extra_generation_params["source_hash"] = (
+            f"{i2i_type}-[=]-{image_to_hash(source_image)}"
+        )
+
         return p

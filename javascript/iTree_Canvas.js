@@ -1,17 +1,5 @@
-class iTreeNode {
-    constructor(self, parent, url, path, type) {
-        this.self = self;
-        this.parent = parent;
-        this.url = url;
-        this.path = path;
-        this.type = type;
-        this.layer = -1;
-        this.rank = -1;
-    }
-}
-
 function apply_transform(delta_x, delta_y, delta_s, SVG) {
-    let [x, y, w, h] = SVG.getAttributeNS(null, 'viewBox').split(' ').map(parseFloat);
+    var [x, y, w, h] = SVG.getAttributeNS(null, 'viewBox').split(' ').map(parseFloat);
 
     if (delta_s === 0.0) {
         x -= delta_x * (w / 1000.0);
@@ -48,25 +36,40 @@ function register_dragging(canvas, SVG) {
     canvas.setAttribute('tabindex', 0);
 
     canvas.addEventListener('keydown', (e) => {
-        if (e.key === ' ')
+        if (e.key === ' ') {
+            e.preventDefault();
             SVG.setAttributeNS(null, 'viewBox', '-50 -200 1280 640');
+        }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        apply_transform(0.0, 0.0, Math.sign(e.deltaY) * 0.1, SVG);
     });
 
     canvas.addEventListener('mousedown', (e) => {
-        if (e.which !== 2)
+        if (e.button != 1)
             return;
-        e.preventDefault();
 
         startX = e.clientX;
         startY = e.clientY;
 
+        e.preventDefault();
         isDragging = true;
         canvas.classList.add('mouse_down');
     });
 
     canvas.addEventListener('mousemove', (e) => {
+        if (!isDragging)
+            return;
+
+        if (e.buttons != 4) {
+            isDragging = false;
+            canvas.classList.remove('mouse_down');
+            return;
+        }
+
         canvas.focus();
-        if (!isDragging) return;
 
         const offsetX = e.clientX - startX;
         const offsetY = e.clientY - startY;
@@ -77,28 +80,33 @@ function register_dragging(canvas, SVG) {
         startY = e.clientY;
     });
 
-    canvas.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        apply_transform(0.0, 0.0, Math.sign(e.deltaY) * 0.1, SVG);
-    });
-
-    canvas.addEventListener('mouseup', (e) => {
-        if (e.which !== 2)
+    canvas.addEventListener("mouseup", (e) => {
+        if (e.button != 1)
             return;
-        e.preventDefault();
 
+        e.preventDefault();
         isDragging = false;
         canvas.classList.remove('mouse_down');
     });
+}
 
-    canvas.addEventListener('mouseleave', (e) => {
-        if (e.which !== 2)
-            return;
-        e.preventDefault();
+function color_hint() {
+    const color_hint = document.createElement("div");
+    color_hint.id = "color_hint";
 
-        isDragging = false;
-        canvas.classList.remove('mouse_down');
+    [
+        ["img2img", "lime"],
+        ["upscale", "orange"],
+        ["downscale", "red"],
+        ["inpaint", "violet"]
+    ].forEach(([mode, color]) => {
+        const label = document.createElement("p");
+        label.style.color = color;
+        label.textContent = mode;
+        color_hint.appendChild(label);
     });
+
+    return color_hint;
 }
 
 function tree_init() {
@@ -118,6 +126,7 @@ function tree_init() {
 
     tab.appendChild(canvas);
     canvas.appendChild(SVG);
+    canvas.append(color_hint());
 
     return SVG;
 }
@@ -129,8 +138,8 @@ function jitter(str) {
 function drawLine(p1x, p1y, p2x, p2y, color) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-    const mpx = (p2x + p1x) / 2 + jitter(10);
-    const mpy = (p2y + p1y) / 2 + jitter(10);
+    const mpx = (p2x + p1x) / 2 + jitter(16);
+    const mpy = (p2y + p1y) / 2 + jitter(16);
 
     const rpx = mpx * 0.25 + (p1x * 0.4 + p2x * 0.6) * 0.75;
     const lpx = mpx * 0.25 + (p1x * 0.6 + p2x * 0.4) * 0.75;
@@ -141,16 +150,16 @@ function drawLine(p1x, p1y, p2x, p2y, color) {
 
     path.setAttributeNS(null, 'd', curve);
     switch (color) {
-        case 'I2I':
+        case 'img2img':
             path.setAttributeNS(null, 'stroke', 'lime');
             break;
-        case 'UPS':
+        case 'upscale':
             path.setAttributeNS(null, 'stroke', 'orange');
             break;
-        case 'DWS':
+        case 'downscale':
             path.setAttributeNS(null, 'stroke', 'red');
             break;
-        case 'INP':
+        case 'inpaint':
             path.setAttributeNS(null, 'stroke', 'violet');
             break;
         default:
