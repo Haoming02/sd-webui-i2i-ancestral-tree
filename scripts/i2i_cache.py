@@ -74,11 +74,15 @@ def to_path(filepath: str) -> str:
 
 def on_save(params: ImageSaveParams):
     """Store the hash of the image whenever one is generated and saved"""
+    if params.p is None:
+        return
     image_hash = image_to_hash(params.image)
     file_path = to_path(params.filename)
     IMAGE_HASH_CACHE.add(image_hash, file_path)
 
-    i2i_mode, source_hash = get_hash_from_parameters(params.pnginfo["parameters"])
+    i2i_mode, source_hash = get_hash_from_parameters(
+        params.pnginfo.get("parameters", None)
+    )
     if source_hash:
         SOURCE_HASH_CACHE.set(file_path, source_hash, tag=i2i_mode)
 
